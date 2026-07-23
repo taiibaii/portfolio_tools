@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rally — Campaign Kits for Zero-Budget Marketers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0E0B12;
+    --bg2: #17121C;
+    --card: #1C1620;
+    --ink: #F4EFE6;
+    --pink: #FF2E7A;
+    --pink-dim: #B8215B;
+    --cyan: #2DE8C4;
+    --muted: #9A8FA0;
+    --line: #35293A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(255,46,122,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(45,232,196,0.10), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 44px 24px 90px; }
+
+  header { margin-bottom: 34px; }
+
+  .brand {
+    font-family: 'Anton', sans-serif;
+    font-size: 54px;
+    letter-spacing: 0.01em;
+    line-height: 0.95;
+    color: var(--ink);
+    text-transform: uppercase;
+    text-shadow: 0 0 24px rgba(255,46,122,0.45);
+  }
+
+  .brand .dot { color: var(--pink); }
+
+  .tagline {
+    font-family: 'Caveat', cursive;
+    font-size: 23px;
+    color: var(--cyan);
+    margin-top: 4px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 28px; align-items: start; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: linear-gradient(180deg, var(--bg2), var(--card));
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 20px 40px rgba(0,0,0,0.35);
+  }
+
+  .panel h2 {
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 16px;
+    color: var(--pink);
+  }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+    color: var(--muted);
+  }
+
+  .field { margin-bottom: 16px; }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14.5px;
+    padding: 10px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--ink);
+    resize: vertical;
+  }
+
+  textarea { min-height: 64px; }
+
+  input:focus, textarea:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+
+  .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  button.run {
+    width: 100%;
+    background: var(--pink);
+    color: #1A0910;
+    border: none;
+    font-family: 'Anton', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 0 18px rgba(255,46,122,0.35);
+  }
+
+  button.run:hover { box-shadow: 0 0 28px rgba(255,46,122,0.6); transform: translateY(-1px); }
+  button.run:disabled { background: var(--muted); cursor: wait; transform: none; box-shadow: none; }
+
+  .error-box {
+    background: rgba(255,46,122,0.1);
+    border: 1.5px solid var(--pink);
+    color: #FF7DA6;
+    padding: 11px 13px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .empty-state {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 40px 20px;
+    text-align: center;
+    border: 1.5px dashed var(--line);
+    border-radius: 6px;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 620px) {
+    .board { grid-template-columns: 1fr; }
+  }
+
+  .note {
+    background: linear-gradient(160deg, var(--bg2), var(--card));
+    border: 1.5px solid var(--line);
+    border-radius: 5px;
+    padding: 18px 16px 15px;
+    position: relative;
+  }
+
+  .note:nth-child(1) { border-color: rgba(255,46,122,0.4); box-shadow: 0 0 26px rgba(255,46,122,0.12); }
+  .note:nth-child(2) { border-color: rgba(45,232,196,0.35); box-shadow: 0 0 26px rgba(45,232,196,0.1); }
+  .note:nth-child(3) { border-color: rgba(255,46,122,0.4); box-shadow: 0 0 26px rgba(255,46,122,0.12); }
+  .note:nth-child(4) { border-color: rgba(45,232,196,0.35); box-shadow: 0 0 26px rgba(45,232,196,0.1); }
+
+  .note.wide { grid-column: 1 / -1; }
+
+  .glow-strip {
+    position: absolute;
+    top: -1.5px;
+    left: 18px;
+    width: 44px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--pink);
+    box-shadow: 0 0 10px rgba(255,46,122,0.8);
+  }
+
+  .note-label {
+    font-family: 'Anton', sans-serif;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--cyan);
+    margin-bottom: 8px;
+    margin-top: 6px;
+  }
+
+  .note-body {
+    font-size: 14.5px;
+    white-space: pre-wrap;
+    color: var(--ink);
+  }
+
+  .note-body.headline {
+    font-family: 'Anton', sans-serif;
+    font-size: 24px;
+    text-transform: uppercase;
+    line-height: 1.05;
+    color: var(--pink);
+    text-shadow: 0 0 18px rgba(255,46,122,0.4);
+  }
+
+  .checklist { list-style: none; padding: 0; margin: 8px 0 0; }
+  .checklist li {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+    color: var(--ink);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "▸"; color: var(--cyan); font-weight: 700; flex-shrink: 0; }
+
+  footer { margin-top: 44px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Rally<span class="dot">.</span></div>
+    <div class="tagline">Campaign kits for marketers with zero budget and one deadline.</div>
+  </header>
+
+  <div class="grid">
+
+    <div class="panel">
+      <h2>What are you promoting?</h2>
+
+      <div class="field">
+        <label for="typeSelect">This is a...</label>
+        <select id="typeSelect">
+          <option value="event">One-off event</option>
+          <option value="business">Small business / local shop</option>
+          <option value="club">Student org / club</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="detailsInput">The basics</label>
+        <textarea id="detailsInput" placeholder="What is it, when/where, what makes it worth showing up for?">Freeze Fest at the Palouse Ice Rink — free skate night with hot cocoa, live music, and a bonfire. Saturday evening, all ages welcome.</textarea>
+      </div>
+
+      <div class="field">
+        <label for="audienceInput">Who you're trying to reach</label>
+        <input type="text" id="audienceInput" placeholder="e.g. college students, families with kids, downtown regulars" value="University students and Moscow families with young kids">
+      </div>
+
+      <div class="field">
+        <label for="voiceSelect">Vibe</label>
+        <select id="voiceSelect">
+          <option value="upbeat">Upbeat and fun</option>
+          <option value="cozy">Warm and cozy</option>
+          <option value="hype">High-energy hype</option>
+          <option value="straightforward">Straightforward, no fluff</option>
+        </select>
+      </div>
+
+      <button class="run" id="runBtn">Build my kit</button>
+      <div id="errorArea"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Your campaign kit</h2>
+      <div id="results">
+        <div class="empty-state">Fill in the basics and hit "Build my kit" — you'll get social captions, a partner-ask message, flyer copy, and a promo checklist sized for zero budget.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Built by Iffat Taiiba — for the one-person marketing teams running real events on no budget.</footer>
+</div>
+
+<script>
+const runBtn = document.getElementById('runBtn');
+const typeSelect = document.getElementById('typeSelect');
+const detailsInput = document.getElementById('detailsInput');
+const audienceInput = document.getElementById('audienceInput');
+const voiceSelect = document.getElementById('voiceSelect');
+const results = document.getElementById('results');
+const errorArea = document.getElementById('errorArea');
+
+runBtn.addEventListener('click', async () => {
+  const type = typeSelect.value;
+  const details = detailsInput.value.trim();
+  const audience = audienceInput.value.trim();
+  const voice = voiceSelect.value;
+  errorArea.innerHTML = '';
+
+  if (!details) {
+    errorArea.innerHTML = '<div class="error-box">Tell us the basics of what you\'re promoting first.</div>';
+    return;
+  }
+
+  runBtn.disabled = true;
+  runBtn.textContent = 'Building...';
+  results.innerHTML = '<div class="empty-state">Putting your kit together...</div>';
+
+  try {
+    const response = await fetch('/api/rally', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, details, audience, voice })
+    });
+
+    const parsed = await response.json();
+
+    if (!response.ok) {
+      throw new Error(parsed.error || 'Request failed.');
+    }
+
+    let html = '<div class="board">';
+
+    html += `<div class="note wide">
+      <div class="glow-strip"></div>
+      <div class="note-label">Flyer</div>
+      <div class="note-body headline">${parsed.flyerHeadline}</div>
+      <div class="note-body" style="margin-top:8px">${parsed.flyerBody}</div>
+    </div>`;
+
+    parsed.captions.forEach((cap, i) => {
+      html += `<div class="note">
+        <div class="glow-strip"></div>
+        <div class="note-label">Caption ${i + 1}</div>
+        <div class="note-body">${cap}</div>
+      </div>`;
+    });
+
+    html += `<div class="note">
+      <div class="glow-strip"></div>
+      <div class="note-label">Partner ask</div>
+      <div class="note-body">${parsed.partnerMessage}</div>
+    </div>`;
+
+    html += `<div class="note wide">
+      <div class="glow-strip"></div>
+      <div class="note-label">Zero-budget checklist</div>
+      <ul class="checklist">
+        ${parsed.checklist.map(c => `<li>${c}</li>`).join('')}
+      </ul>
+    </div>`;
+
+    html += '</div>';
+    results.innerHTML = html;
+  } catch (err) {
+    results.innerHTML = '<div class="empty-state">Something went wrong — try again.</div>';
+    errorArea.innerHTML = `<div class="error-box">${err.message}</div>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = 'Build my kit';
+  }
+});
+</script>
+</body>
+</html>
