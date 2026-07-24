@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
 <title>Rally — Campaign Kits for Zero-Budget Marketers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --bg: #0E0B12;
@@ -226,6 +228,123 @@
   .checklist li:last-child { border-bottom: none; }
   .checklist li::before { content: "▸"; color: var(--cyan); font-weight: 700; flex-shrink: 0; }
 
+  .template-canvas {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 4 / 5;
+    border-radius: 6px;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--bg2), var(--card));
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    margin: 12px auto 0;
+    border: 1.5px solid var(--line);
+  }
+
+  .template-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 35%, rgba(14,11,18,0.88) 100%);
+    pointer-events: none;
+  }
+
+  .photo-upload-input { display: none; }
+
+  .photo-upload-label {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(0,0,0,0.55);
+    border: 1.5px dashed var(--cyan);
+    color: var(--cyan);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .template-headline {
+    font-family: 'Anton', sans-serif;
+    font-size: 26px;
+    text-transform: uppercase;
+    line-height: 1.05;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+    outline: none;
+    cursor: text;
+  }
+
+  .template-body {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    margin-top: 8px;
+    position: relative;
+    z-index: 2;
+    outline: none;
+    cursor: text;
+  }
+
+  .template-headline:focus, .template-body:focus {
+    outline: 1.5px dashed var(--cyan);
+    outline-offset: 4px;
+  }
+
+  .template-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .secondary-btn {
+    background: transparent;
+    border: 1.5px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .secondary-btn:hover { background: rgba(45,232,196,0.12); }
+
+  .template-canvas.style-minimal {
+    background: linear-gradient(160deg, #F2F0EA, #E7E2D5);
+  }
+  .template-canvas.style-minimal .template-headline,
+  .template-canvas.style-minimal .template-body {
+    color: #1A1712;
+  }
+  .template-canvas.style-minimal .template-overlay {
+    background: linear-gradient(180deg, transparent 35%, rgba(242,240,234,0.92) 100%);
+  }
+
+  .template-canvas.style-retro {
+    background: linear-gradient(160deg, #3B2A1E, #5A4530);
+  }
+  .template-canvas.style-retro .template-headline,
+  .template-canvas.style-retro .template-body {
+    color: #F5EAD6;
+  }
+  .template-canvas.style-retro .template-overlay {
+    background: linear-gradient(180deg, transparent 35%, rgba(30,20,12,0.88) 100%);
+  }
+
   footer { margin-top: 44px; font-size: 12px; color: var(--muted); text-align: center; }
 
   @media (prefers-reduced-motion: reduce) {
@@ -275,6 +394,12 @@
         </select>
       </div>
 
+      <div class="field">
+        <label for="styleImageInput">Style inspiration (optional)</label>
+        <input type="file" id="styleImageInput" accept="image/*">
+        <div class="hint">Upload any image for a general mood/color direction — not a specific design to copy.</div>
+      </div>
+
       <button class="run" id="runBtn">Build my kit</button>
       <div id="errorArea"></div>
     </div>
@@ -297,8 +422,68 @@ const typeSelect = document.getElementById('typeSelect');
 const detailsInput = document.getElementById('detailsInput');
 const audienceInput = document.getElementById('audienceInput');
 const voiceSelect = document.getElementById('voiceSelect');
+const styleImageInput = document.getElementById('styleImageInput');
 const results = document.getElementById('results');
 const errorArea = document.getElementById('errorArea');
+let styleImageData = null;
+
+styleImageInput.addEventListener('change', () => {
+  const file = styleImageInput.files && styleImageInput.files[0];
+  if (!file) { styleImageData = null; return; }
+  const reader = new FileReader();
+  reader.onload = (e) => { styleImageData = e.target.result; };
+  reader.readAsDataURL(file);
+});
+
+function setupTemplateCard(style, accentColor) {
+  const canvas = document.getElementById('templateCanvas');
+  const photoInput = document.getElementById('photoUpload');
+  const photoLabel = document.getElementById('photoUploadLabel');
+  const headline = document.getElementById('templateHeadline');
+  const downloadBtn = document.getElementById('downloadTemplateBtn');
+  if (!canvas || !photoInput || !downloadBtn) return;
+
+  const validStyles = ['bold', 'minimal', 'retro'];
+  const finalStyle = validStyles.includes(style) ? style : 'bold';
+  const finalAccent = /^#[0-9A-Fa-f]{6}$/.test(accentColor || '') ? accentColor : '#FF2E7A';
+
+  canvas.classList.remove('style-bold', 'style-minimal', 'style-retro');
+  canvas.classList.add('style-' + finalStyle);
+  if (headline) {
+    headline.style.color = finalAccent;
+    headline.style.textShadow = finalStyle === 'minimal' ? 'none' : `0 0 18px ${finalAccent}66`;
+  }
+  if (photoLabel) {
+    photoLabel.style.borderColor = finalAccent;
+    photoLabel.style.color = finalAccent;
+  }
+
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      canvas.style.backgroundImage = `url(${e.target.result})`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Preparing...';
+    html2canvas(canvas, { useCORS: true, backgroundColor: null, scale: 2 }).then((rendered) => {
+      const link = document.createElement('a');
+      link.download = 'rally-flyer.png';
+      link.href = rendered.toDataURL('image/png');
+      link.click();
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = 'Download as image';
+    }).catch(() => {
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = 'Download as image';
+    });
+  });
+}
 
 runBtn.addEventListener('click', async () => {
   const type = typeSelect.value;
@@ -320,7 +505,7 @@ runBtn.addEventListener('click', async () => {
     const response = await fetch('/api/rally', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, details, audience, voice })
+      body: JSON.stringify({ type, details, audience, voice, styleImage: styleImageData })
     });
 
     const parsed = await response.json();
@@ -360,8 +545,25 @@ runBtn.addEventListener('click', async () => {
       </ul>
     </div>`;
 
+    html += `<div class="note wide">
+      <div class="glow-strip"></div>
+      <div class="note-label">Editable flyer template</div>
+      <div class="hint" style="margin-bottom:6px">Click the text to edit it. Upload your own photo. Download it when it looks right.</div>
+      <div class="template-canvas" id="templateCanvas">
+        <input type="file" id="photoUpload" class="photo-upload-input" accept="image/*">
+        <label for="photoUpload" class="photo-upload-label" id="photoUploadLabel">+ Add your photo</label>
+        <div class="template-overlay"></div>
+        <div class="template-headline" contenteditable="true" id="templateHeadline">${parsed.flyerHeadline}</div>
+        <div class="template-body" contenteditable="true" id="templateBody">${parsed.flyerBody}</div>
+      </div>
+      <div class="template-actions">
+        <button class="secondary-btn" id="downloadTemplateBtn">Download as image</button>
+      </div>
+    </div>`;
+
     html += '</div>';
     results.innerHTML = html;
+    setupTemplateCard(parsed.style, parsed.accentColor);
   } catch (err) {
     results.innerHTML = '<div class="empty-state">Something went wrong — try again.</div>';
     errorArea.innerHTML = `<div class="error-box">${err.message}</div>`;
